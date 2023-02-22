@@ -53,6 +53,7 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
     require(_exists(tokenId), "ERC721: invalid token ID");
   }
 
+  // update balance
   function _beforeTokenTransfer(
     address from,
     address to,
@@ -109,7 +110,7 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
     require(to != address(0), "ERC721: mint to the zero address");
     require(!_exists(tokenId), "ERC721: token already minted");
 
-    // _beforeTokenTransfer(address(0), to, tokenId, 1);
+    _beforeTokenTransfer(address(0), to, tokenId, 1);
 
     unchecked {
       _balances[to] += 1;
@@ -138,7 +139,7 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
     _afterTokenTransfer(owner, address(0), tokenId, 1);
   }
 
-  function _transfer(address from, address to, uint256 tokenId) internal virtual {
+  function transfer(address from, address to, uint256 tokenId) public {
     require(myERC.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
     require(to != address(0), "ERC721: transfer to the zero address");
 
@@ -202,7 +203,7 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
   function transferFrom(address from, address to, uint256 tokenId) public virtual override {
     require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
 
-    _transfer(from, to, tokenId);
+    transfer(from, to, tokenId);
   }
 
   function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override {
@@ -215,7 +216,7 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
   }
 
   function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual {
-    _transfer(from, to, tokenId);
+    transfer(from, to, tokenId);
     require(_checkOnERC721Received(from, to, tokenId, data), "ERC721: transfer to non ERC721Receiver implementer");
   }
 
