@@ -1,6 +1,14 @@
 const myERC = artifacts.require('myERC.sol');
 
 contract('myERC', () => {
+  /**
+   * Test 1
+   * 
+   * Create contract, return name and symbol. Simple constructor demonstration
+   * and accessing contract functions.
+   * 
+   * FAIL: none
+   */
   it('should test constructor, return name and symbol', async () => {
     const storage = await myERC.new("myERC", "MERC");
 
@@ -10,13 +18,38 @@ contract('myERC', () => {
     const symbol = await storage.symbol();
     assert(symbol === "MERC");
   })
-  // this starts another contract instance, will fail
-  // it('should test instance2', async () => {
-  //   const name2 = await storage.name();
-  //   assert(name2 === "myERC");
-  // })
-  it('should mint, return balance, check token ID', async () => {
+  /**
+   * Test 2
+   * 
+   * This starts another contract instance, so it will fail. 
+   * Show that new tests need to create new instances.
+   * 
+   * FAIL: accessing old instance
+   */
+  it('should test instance2', async () => {
+    try{
+      const name2 = await storage.name();
+      assert(name2 === "myERC");
+    } catch (e) {
+      console.log(`The test failed successfully: ${e}`);
+    }
+  })
+  /**
+   * Test 3
+   * 
+   * Mint an NFT, check the balance of the owners address, check ownership
+   * of first tokenId.
+   * 
+   * FAIL: Mint to zero address
+   */
+  it('should mint, return balance, check token ID for owner', async () => {
     const storage = await myERC.new("myERC2", "MERC2");
+
+    try {
+      await storage.safeMint('0x0000000000000000000000000000000000000000');
+    } catch (e) {
+      console.log(`Mint test failed successfully: ${e}`);
+    }
 
     await storage.safeMint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
     const amt = await storage.balanceOf('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
@@ -25,6 +58,14 @@ contract('myERC', () => {
     const addr = await storage.ownerOf(0);
     assert(addr == 0x1028c139157ab9be0eb649c6fc10fb792b21cb67, "address wrong");
   })
+  /**
+   * Test 4
+   * 
+   * Mint an entire collection for one contract address. The collection could
+   * use AI generated art images hosted on IPFS.
+   * 
+   * FAIL: none.
+   */
   it('should mint a collection', async () => {
     const storage = await myERC.new("myERC3", "MERC3");
 
@@ -68,6 +109,14 @@ contract('myERC', () => {
     const addr9 = await storage.ownerOf(9);
     assert(addr9 == 0xbcfcb2ae864db0e703404a133bf7356fb45ac8cf, "addr9 wrong");
   })
+  /**
+   * Test 5
+   * 
+   * Simulate a sale, then transfer ownership. Check if the seller has access
+   * to sell the token again with a failing test.
+   * 
+   * FAIL: seller is not owner
+   */
   it('should transfer NFT', async () => {
     const storage = await myERC.new('myERC4', 'MERC4');
 
@@ -76,5 +125,12 @@ contract('myERC', () => {
     await storage.transfer('0x1028c139157ab9be0eb649c6fc10fb792b21cb67', '0x9174521c0f0c48faf171a9129755e83d15aeae61', 0);
     const owner = await storage.ownerOf(0);
     assert(owner == 0x9174521c0f0c48faf171a9129755e83d15aeae61, "transfer failed");
+
+    // this will fail because addr0 no longer owns the NFT
+    try {
+      await storage.transfer('0x1028c139157ab9be0eb649c6fc10fb792b21cb67', '0x9174521c0f0c48faf171a9129755e83d15aeae61', 0);
+    } catch (e) {
+      console.log(`The transfer test failed successfully: ${e}`);
+    }
   })
 })

@@ -25,21 +25,25 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
   mapping(uint256 => address) private _tokenApprovals;
   mapping(address => mapping(address => bool)) private _operatorApprovals;
 
+  // tested, works
   constructor(string memory name_, string memory symbol_){
     _name = name_;
     _symbol = symbol_;
   }
 
+  // tested, works
   function name() public view virtual override returns (string memory) {
     return _name;
   }
 
+  // tested, works
   function symbol() public view virtual override returns (string memory) {
     return _symbol;
   }
 
+  // need to replace this with IPFS URI
   function _baseURI() internal view virtual returns (string memory) {
-    return "";
+    return "test";
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
@@ -49,25 +53,9 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
     return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
   }
 
+  // tested, works
   function _requireMinted(uint256 tokenId) internal view virtual {
     require(_exists(tokenId), "ERC721: invalid token ID");
-  }
-
-  // update balance
-  function _beforeTokenTransfer(
-    address from,
-    address to,
-    uint256 /* first tokenId */,
-    uint256 batchSize
-  ) internal virtual {
-    if (batchSize > 1) {
-      if (from != address(0)) {
-        _balances[from] -= batchSize;
-      }
-      if (to != address(0)) {
-        _balances[to] += batchSize;
-      }
-    }
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
@@ -76,7 +64,8 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
       interfaceId == type(IERC721Metadata).interfaceId ||
       super.supportsInterface(interfaceId);
   }
-
+  // tested, this works
+  // should I add the ability to only have the owner be able to mint?
   function safeMint(address to) public {
     uint256 tokenId = _tokenIdCounter.current();
     _tokenIdCounter.increment();
@@ -110,8 +99,6 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
     require(to != address(0), "ERC721: mint to the zero address");
     require(!_exists(tokenId), "ERC721: token already minted");
 
-    _beforeTokenTransfer(address(0), to, tokenId, 1);
-
     unchecked {
       _balances[to] += 1;
     }
@@ -120,30 +107,27 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
 
     emit Transfer(address(0), to, tokenId);
 
-    _afterTokenTransfer(address(0), to, tokenId, 1);
   }
 
-  function _burn(uint256 tokenId) internal virtual {
-    address owner = myERC.ownerOf(tokenId);
+  // function _burn(uint256 tokenId) internal virtual {
+  //   address owner = myERC.ownerOf(tokenId);
 
-    _beforeTokenTransfer(owner, address(0), tokenId, 1);
+  //   _beforeTokenTransfer(owner, address(0), tokenId, 1);
 
-    owner = myERC.ownerOf(tokenId);
-    delete _tokenApprovals[tokenId];
-    unchecked {
-      _balances[owner] -= 1;
-    }
-    delete _owners[tokenId];
-    emit Transfer(owner, address(0), tokenId);
+  //   owner = myERC.ownerOf(tokenId);
+  //   delete _tokenApprovals[tokenId];
+  //   unchecked {
+  //     _balances[owner] -= 1;
+  //   }
+  //   delete _owners[tokenId];
+  //   emit Transfer(owner, address(0), tokenId);
 
-    _afterTokenTransfer(owner, address(0), tokenId, 1);
-  }
+  //   _afterTokenTransfer(owner, address(0), tokenId, 1);
+  // }
 
   function transfer(address from, address to, uint256 tokenId) public {
     require(myERC.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
     require(to != address(0), "ERC721: transfer to the zero address");
-
-    _beforeTokenTransfer(from, to, tokenId, 1);
 
     require(myERC.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
 
@@ -157,7 +141,6 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
     _owners[tokenId] = to;
 
     emit Transfer(from, to, tokenId);
-    _afterTokenTransfer(from, to, tokenId, 1);
   }
 
   // comment this out and you get back to the "should be abstract" error
@@ -228,6 +211,7 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
       return _ownerOf(tokenId) != address(0);
   }
 
+  // all ERC721 tokens must implement the ERC721Receiver
   function _checkOnERC721Received(
     address from,
     address to,
@@ -239,7 +223,7 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
         return retval == IERC721Receiver.onERC721Received.selector;
       } catch (bytes memory reason) {
         if (reason.length == 0) {
-          revert("ERC721: transfer to non ERC721Reciever implementer");
+          revert("ERC721: transfer to non ERC721Receiver implementer");
         } else {
           assembly {
             revert(add(32, reason), mload(reason))
@@ -250,6 +234,4 @@ contract myERC is ERC165, Ownable, IERC721, IERC721Metadata {
       return true;
     }
   }
-
-  function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual {}
 }
