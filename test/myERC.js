@@ -200,12 +200,14 @@ contract('myERC', () => {
 
     await storage.safeMint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
     
-    const myAddr = await storage.getApproved(0);// this returns the zero address
-    console.log(myAddr);
+    // this returns the zero address
+    // const myAddr = await storage.getApproved(0);
+    // console.log(myAddr);
 
     await storage.setApprovalForAll('0x9174521c0f0c48faf171a9129755e83d15aeae61', true);
-    const b = await storage.isApprovedForAll('0x9174521c0f0c48faf171a9129755e83d15aeae61', '0x9174521c0f0c48faf171a9129755e83d15aeae61');
+    const b = await storage.isApprovedForAll('0x1028c139157ab9be0eb649c6fc10fb792b21cb67', '0x9174521c0f0c48faf171a9129755e83d15aeae61');
 
-    console.log(`${b}`);
+    console.log(`Approving the truffle-config private key: ${b}`);
+    await storage.transferFrom('0x1028c139157ab9be0eb649c6fc10fb792b21cb67', '0x5bf5d31806a4599da5ce554f873eb20becd831ba', 0);
   })
 })

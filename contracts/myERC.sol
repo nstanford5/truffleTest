@@ -132,7 +132,7 @@ contract myERC is ERC165, Ownable, IERC721 {
 
   // required by the spec
   function transferFrom(address from, address to, uint256 tokenId) public {
-    require(_isApprovedOrOwner(from, tokenId), "ERC721: caller is not token owner or approved");
+    require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
     require(myERC.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
     require(to != address(0), "ERC721: transfer to the zero address");
 
