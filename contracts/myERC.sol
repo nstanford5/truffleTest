@@ -1,3 +1,7 @@
+/**
+  To add:
+    - URI for IPFS?
+ */
 pragma solidity >=0.4.25 <0.9.0;
 
 import "../node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol";
@@ -30,13 +34,13 @@ contract myERC is ERC165, Ownable, IERC721 {
 
   // helper
   // tested
-  function name() public view virtual returns (string memory) {
+  function name() public view returns (string memory) {
     return _name;
   }
 
   // tested
   // helper
-  function symbol() public view virtual returns (string memory) {
+  function symbol() public view returns (string memory) {
     return _symbol;
   }
 
@@ -85,6 +89,7 @@ contract myERC is ERC165, Ownable, IERC721 {
     emit Transfer(address(0), to, tokenId);
   }
 
+  // extra
   function transfer(address from, address to, uint256 tokenId) public {
     require(myERC.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
     require(to != address(0), "ERC721: transfer to the zero address");
@@ -180,7 +185,7 @@ contract myERC is ERC165, Ownable, IERC721 {
             revert(add(32, reason), mload(reason))
           }
         }
-      }
+      } // end of catch
     } else {
       return true;
     }

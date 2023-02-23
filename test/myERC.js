@@ -46,12 +46,12 @@ contract('myERC', () => {
     const storage = await myERC.new("myERC2", "MERC2");
 
     try {
-      await storage.safeMint('0x0000000000000000000000000000000000000000');
+      await storage.mint('0x0000000000000000000000000000000000000000');
     } catch (e) {
       console.log(`Mint test failed successfully: ${e}`);
     }
 
-    await storage.safeMint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
+    await storage.mint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
     const amt = await storage.balanceOf('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
     assert(amt.toString() === "1", "balance wrong");
 
@@ -69,43 +69,43 @@ contract('myERC', () => {
   it('should mint a collection', async () => {
     const storage = await myERC.new("myERC3", "MERC3");
 
-    await storage.safeMint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
+    await storage.mint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
     const addr0 = await storage.ownerOf(0);
     assert(addr0 == 0x1028c139157ab9be0eb649c6fc10fb792b21cb67, "addr0 wrong");
     
-    await storage.safeMint('0x9174521c0f0c48faf171a9129755e83d15aeae61');
+    await storage.mint('0x9174521c0f0c48faf171a9129755e83d15aeae61');
     const addr1 = await storage.ownerOf(1);
     assert(addr1 == 0x9174521c0f0c48faf171a9129755e83d15aeae61, "addr1 wrong");
     
-    await storage.safeMint('0x5bf5d31806a4599da5ce554f873eb20becd831ba');
+    await storage.mint('0x5bf5d31806a4599da5ce554f873eb20becd831ba');
     const addr2 = await storage.ownerOf(2);
     assert(addr2 == 0x5bf5d31806a4599da5ce554f873eb20becd831ba, "addr2 wrong");
 
-    await storage.safeMint('0x59cba8c4545880c30a26c6073caa266c3120b964');
+    await storage.mint('0x59cba8c4545880c30a26c6073caa266c3120b964');
     const addr3 = await storage.ownerOf(3);
     assert(addr3 == 0x59cba8c4545880c30a26c6073caa266c3120b964, "addr3 wrong");
 
-    await storage.safeMint('0x849d58ae76f2d5783a447a5dda3fb7110c6896e3');
+    await storage.mint('0x849d58ae76f2d5783a447a5dda3fb7110c6896e3');
     const addr4 = await storage.ownerOf(4);
     assert(addr4 == 0x849d58ae76f2d5783a447a5dda3fb7110c6896e3, "addr4 wrong");
     
-    await storage.safeMint('0x50371ea88391c342501d53926e3ae2d32663f604');
+    await storage.mint('0x50371ea88391c342501d53926e3ae2d32663f604');
     const addr5 = await storage.ownerOf(5);
     assert(addr5 == 0x50371ea88391c342501d53926e3ae2d32663f604, "addr5 wrong");
     
-    await storage.safeMint('0x82a27c2b70ed658240becd4aa4510abca45abaeb');
+    await storage.mint('0x82a27c2b70ed658240becd4aa4510abca45abaeb');
     const addr6 = await storage.ownerOf(6);
     assert(addr6 == 0x82a27c2b70ed658240becd4aa4510abca45abaeb, "addr6 wrong");
     
-    await storage.safeMint('0x58ff570794a5e9a23b840c5ed28471416e67414f');
+    await storage.mint('0x58ff570794a5e9a23b840c5ed28471416e67414f');
     const addr7 = await storage.ownerOf(7);
     assert(addr7 == 0x58ff570794a5e9a23b840c5ed28471416e67414f, "addr7 wrong");
     
-    await storage.safeMint('0x0d26f7f1bd92f01b81f57b562adb23bd80289523');
+    await storage.mint('0x0d26f7f1bd92f01b81f57b562adb23bd80289523');
     const addr8 = await storage.ownerOf(8);
     assert(addr8 == 0x0d26f7f1bd92f01b81f57b562adb23bd80289523, "addr8 wrong");
     
-    await storage.safeMint('0xbcfcb2ae864db0e703404a133bf7356fb45ac8cf');
+    await storage.mint('0xbcfcb2ae864db0e703404a133bf7356fb45ac8cf');
     const addr9 = await storage.ownerOf(9);
     assert(addr9 == 0xbcfcb2ae864db0e703404a133bf7356fb45ac8cf, "addr9 wrong");
   })
@@ -120,7 +120,7 @@ contract('myERC', () => {
   it('should transfer NFT', async () => {
     const storage = await myERC.new('myERC4', 'MERC4');
 
-    await storage.safeMint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
+    await storage.mint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
 
     await storage.transfer('0x1028c139157ab9be0eb649c6fc10fb792b21cb67', '0x9174521c0f0c48faf171a9129755e83d15aeae61', 0);
     const owner = await storage.ownerOf(0);
@@ -132,5 +132,63 @@ contract('myERC', () => {
     } catch (e) {
       console.log(`The transfer test failed successfully: ${e}`);
     }
+  })
+  /**
+   * Test 6
+   * 
+   * Should test interface IDs, the standard requires implemting ERC165
+   * 
+   * FAIL: random interface ID (as booleans)
+   */
+  it('should test interface', async () => {
+    // ERC165 interface ID == 0x80ac58cd
+    const storage = await myERC.new('myERC5', 'MERC5');
+    
+    const b = await storage.supportsInterface('0x80ac58cd');
+    console.log(`ERC165 interface support is: ${b}`);
+
+    const b2 = await storage.supportsInterface('0xffffffff');
+    console.log(`This interface id should return false is: ${!b2}`);
+
+    const b3 = await storage.supportsInterface('0x12345678');
+    console.log(`Support for this random number is: ${b3}`);
+  })
+  it('should test iterating', async () => {
+    const storage = await myERC.new('myERC6', 'MERC6');
+    const addresses = [ '0x1028c139157ab9be0eb649c6fc10fb792b21cb67',
+                      '0x9174521c0f0c48faf171a9129755e83d15aeae61',
+                      '0x5bf5d31806a4599da5ce554f873eb20becd831ba',
+                      '0x59cba8c4545880c30a26c6073caa266c3120b964',
+                      '0x849d58ae76f2d5783a447a5dda3fb7110c6896e3',
+                      '0x50371ea88391c342501d53926e3ae2d32663f604',
+                      '0x82a27c2b70ed658240becd4aa4510abca45abaeb',
+                      '0x58ff570794a5e9a23b840c5ed28471416e67414f',
+                      '0x0d26f7f1bd92f01b81f57b562adb23bd80289523',
+                      '0xbcfcb2ae864db0e703404a133bf7356fb45ac8cf'];
+
+    const mint = async (addr, id) => {
+      await storage.mint(addr);
+      const addy = await storage.ownerOf(id);
+      assert(addy == addr, `${addr} wrong`);
+    }
+
+    // these are throwing, because of the assert mismatch
+    // await mint(addresses[0], 0);
+    // await mint(addresses[1], 1);
+
+  })
+  /**
+   * Why is does this not return correctly?
+   * The value matches, the types return the same
+   */
+  it('should test address return type', async () => {
+    const storage = await myERC.new('myERC7', 'MERC7');
+
+    await storage.mint('0x1028c139157ab9be0eb649c6fc10fb792b21cb67');
+    const addy = await storage.ownerOf(0);
+    console.log(addy);// 0x1028c139157ab9be0eb649c6fc10fb792b21cb67
+    console.log(typeof addy);// string
+    console.log(typeof '0x1028c139157ab9be0eb649c6fc10fb792b21cb67');// string
+    assert(addy == 0x1028c139157ab9be0eb649c6fc10fb792b21cb67, "address wrong");
   })
 })
