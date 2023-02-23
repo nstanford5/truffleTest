@@ -1,6 +1,6 @@
 /**
   To add:
-    - URI for IPFS?
+    - URI for IPFS? Requires burn and super calls
  */
 pragma solidity >=0.4.25 <0.9.0;
 
@@ -67,7 +67,7 @@ contract myERC is ERC165, Ownable, IERC721 {
   }
 
   // extra
-  function mint(address to) public {
+  function safeMint(address to) public {
     require(to != address(0), "ERC721: mint to the zero address");
 
     uint256 tokenId = _tokenIdCounter.current();
@@ -87,24 +87,6 @@ contract myERC is ERC165, Ownable, IERC721 {
 
     // required by spec
     emit Transfer(address(0), to, tokenId);
-  }
-
-  // extra
-  function transfer(address from, address to, uint256 tokenId) public {
-    require(myERC.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
-    require(to != address(0), "ERC721: transfer to the zero address");
-
-    delete _tokenApprovals[tokenId];
-
-    unchecked {
-      _balances[from] -= 1;
-      _balances[to] += 1;
-    }
-
-    _owners[tokenId] = to;
-
-    // the ERC721 standard requires we emit this event
-    emit Transfer(from, to, tokenId);
   }
 
   // required by the spec (marked as external payable)
@@ -149,9 +131,22 @@ contract myERC is ERC165, Ownable, IERC721 {
   }
 
   // required by the spec
-  function transferFrom(address from, address to, uint256 tokenId) external {
-    require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
-    transfer(from, to, tokenId);
+  function transferFrom(address from, address to, uint256 tokenId) public {
+    require(_isApprovedOrOwner(from, tokenId), "ERC721: caller is not token owner or approved");
+    require(myERC.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+    require(to != address(0), "ERC721: transfer to the zero address");
+
+    delete _tokenApprovals[tokenId];
+
+    unchecked {
+      _balances[from] -= 1;
+      _balances[to] += 1;
+    }
+
+    _owners[tokenId] = to;
+
+    // the standard requires we emit this event
+    emit Transfer(from, to, tokenId);
   }
 
   // required by the spec
@@ -162,7 +157,7 @@ contract myERC is ERC165, Ownable, IERC721 {
   // required by the spec
   function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public {
     require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
-    transfer(from, to, tokenId);
+    transferFrom(from, to, tokenId);
     require(_checkOnERC721Received(from, to, tokenId, data), "ERC721: transfer to non ERC721REceiver implementer");
   }
 
